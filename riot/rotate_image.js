@@ -1,2 +1,10 @@
+require('./rotateImageList.tag');
 require('./rotateImage.tag');
-riot.mount('rotateImage');
+
+var obs = riot.observable();
+
+riot.mixin('obs', {
+    obs: obs
+});
+
+riot.mount('rotateImageList');

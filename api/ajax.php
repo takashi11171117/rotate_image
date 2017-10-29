@@ -1,38 +1,49 @@
 <?php
-$contentType = isset( $_SERVER['CONTENT_TYPE'] ) ? trim( $_SERVER['CONTENT_TYPE'] ) : '';
+// $_POST['action'] = 'rotate';
+// $_POST['file'] = 'img/test.gif?date=1508304889608';
+// $_POST['rotate'] = 270;
 
-// $contentType = 'application/json';
-// $decoded['type'] = 'rotate';
-// $decoded['file'] = 'img/test.gif?date=1508304889608';
-// $decoded['rotate'] = 270;
+if( $_POST['action'] === 'images_show' ) {
+  $img_dir = 'img/';
+  $files = array(
+    '3333' => array(
+      "date" =>  '2017-10-10',
+      "filename" =>  'test.jpg',
+      "url" => $img_dir . 'test.jpg',
+    ),
+    '2222' => array(
+      "date" => '2017-10-10',
+      "filename" => 'test.png',
+      "url" =>  $img_dir . 'test.png',
+    ),
+    '1111' => array(
+      "date" => '2017-10-10',
+      "filename" => 'test.gif',
+      "url" => $img_dir . 'test.gif',
+    ),
+  );
 
-if ( $contentType === 'application/json' ) {
-  $content = trim( file_get_contents('php://input') );
-  $decoded = json_decode( $content, true );
+  echo json_encode( $files );
+}
 
-  if( $decoded['type'] === 'get_image_list' ) {
-    $img_dir = 'img/';
-    $files = array(
-      '3333' => $img_dir . 'test.jpg',
-      '2222' => $img_dir . 'test.png',
-      '1111' => $img_dir . 'test.gif',
-    );
+if( $_POST['action'] === 'rotate_image' ) {
+  if( isset( $_POST['filename'] ) ) {
+    $filename = $_POST['filename'];
+    $filename_arr = explode( '.', $filename );
+    $upload = dirname( dirname( __FILE__ ) ) . '/img/';
+    $img_dir = $upload . '/' . $_POST['filename'];
 
-    echo json_encode( $files );
-  }
-
-  if( $decoded['type'] === 'rotate' ) {
-    $filename = preg_replace( array( '/\?.*/' ), array( '' ), basename( $decoded['file'] ) );
-    $filename_arr = explode('.', $filename);
-    $img_dir = dirname( dirname( __FILE__ ) ) . '/img/';
-
-    rotateImage( $img_dir . $filename, $decoded['rotate'] );
-    foreach( glob($img_dir . $filename_arr[0] . '-*' . $filename_arr[1]) as $file ) {
-      rotateImage( $file, $decoded['rotate'] );
+    rotateImage( $img_dir, $_POST['rotate'] );
+    foreach( glob( $upload . $filename_arr[0] . '-*' . $filename_arr[1]) as $file ) {
+      rotateImage( $file, $_POST['rotate'] );
     }
 
-    echo json_encode( $decoded );
+    echo json_encode( glob( $upload . $filename_arr[0] . '-*' . $filename_arr[1]) );
   }
+}
+
+if( $_POST['action'] === 'delete_image' ) {
+  echo json_encode( $_POST );
 }
 
 function rotateImage( $tmp_name, $rotate ) {

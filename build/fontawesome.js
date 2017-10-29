@@ -1,8 +1,6 @@
-webpackJsonp([1],[
-/* 0 */,
-/* 1 */,
-/* 2 */,
-/* 3 */
+webpackJsonp([1],{
+
+/***/ 3:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -958,7 +956,8 @@ riot.tag2('fa', '', 'fa,[riot-tag="fa"],[data-is="fa"]{ display: inline-block; f
 });
 
 /***/ }),
-/* 4 */
+
+/***/ 5:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -970,4 +969,5 @@ riot.mount('*');
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ })
-],[4]);
+
+},[5]);

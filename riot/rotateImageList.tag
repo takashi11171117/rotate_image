@@ -1,7 +1,7 @@
 <rotateImageList>
 	<!-- layout -->
   <div class="rotate_image_list_container">
-    <rotateImage obs={obs} each="{ value, i in files }" file={value} imgid={i}></rotateImage>
+    <rotateImage obs={obs} each="{ value, i in files }" file="{value.url}" filename="{value.filename}" date="{value.date}" imgid="{i}"></rotateImage>
   </div>
 
 	<!-- style -->
@@ -20,20 +20,22 @@
 	<script>
   this.files = {};
   this.on('mount', () => {
-    let url = 'https://localhost/js_test/rotate_image/api/ajax.php';
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        type: 'get_image_list',
-      })
-    }).then( response => {
-      return response.json()
-    }).then( json => {
-      this.files = json;
-      this.update();
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+          action : 'images_show',
+          post_id: this.opts.post_id,
+          tax: this.opts.tax,
+        },
+        success: ( data ) => {
+          data = $.parseJSON(data);
+          this.files = data;
+          this.update();
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          alert("AJAXが機能していません。");
+        }
     });
   })
 	</script>

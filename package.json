@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "riot-fa": "^4.6.2",
+    "riotgear": "^3.5.0",
     "whatwg-fetch": "^2.0.3"
   }
 }

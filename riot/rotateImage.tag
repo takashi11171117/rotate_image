@@ -1,6 +1,7 @@
 <rotateImage>
 	<!-- layout -->
   <div class={ fade: is_container } id="rotate_image_container{ opts.imgid }">
+    <div class="image_date">{opts.date}</div>
     <div class="rotate_button">
       <button type="button" name="left" onClick={ rotateLeft }><fa icon="undo" /></button>
       <button type="button" name="right" onClick={ rotateRight }><fa icon="repeat" /></button>
@@ -10,13 +11,17 @@
     </div>
     <div class="delete_button{ opts.imgid } delete_button">
       <button type="button" name="save" onClick={ saveImage }><fa icon="floppy-o" /></button>
-      <button type="button" name="delete" onClick={ deleteImage }><fa icon="trash" /></button>
+      <button type="button" name="delete" onClick={ confirmImage }><fa icon="trash" /></button>
     </div>
   </div>
+  <rg-modal modal="{ modal }">削除しますか？</rg-modal>
 
 	<!-- style -->
 	<style type="sass">
-  .button
+  .image_date
+    margin-bottom: 5px
+
+  .ope_button
     font-size: 16px
     padding: 5px
     background-color: white
@@ -37,12 +42,12 @@
   .rotate_button
     margin-bottom: 5px
     button
-      @extend .button
+      @extend .ope_button
 
   .delete_button
     margin-top: 5px
     button
-      @extend .button
+      @extend .ope_button
 
   div
     transition: all .2s
@@ -82,7 +87,25 @@
   this.over_img = null,
   this.buttons = null,
   this.img = new Image(),
-  this.org_img = new Image();
+  this.org_img = new Image(),
+  this.modal = {
+    isvisible: false,
+    dismissable: true,
+    heading: '確認画面',
+    buttons: [{
+      text: 'Ok',
+      type: 'primary',
+      action: () => {
+        deleteImage();
+      }
+    }, {
+      text: 'Cancel',
+      action: () => {
+        this.modal.isvisible = false;
+        this.update();
+      }
+    }]
+  };
 
   this.loadimg = ({ src }) => {
       return new Promise((resolve, reject) => {
@@ -135,7 +158,6 @@
     if( this.now_rotate < 0 ) this.now_rotate = this.now_rotate + 360;
     this.img.src = imageResize(this.org_img, "image/jpeg", this.width, this.height, this.rotate);
     this.count++;
-    console.log(this.rotate, this.now_rotate, this.count);
   }
 
   rotateRight() {
@@ -158,32 +180,33 @@
     for( let i of this.buttons ) {
       i.disabled = true;
     }
-    let url = 'https://localhost/js_test/rotate_image/api/ajax.php';
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        type: 'rotate',
-        file: this.org_img.src,
-        rotate: this.now_rotate,
-      })
-    }).then( response => {
-      return response
-    }).then( json => {
-      this.count = 0;
-      this.now_rotate = 0;
-      for( let i of this.buttons ) {
-        i.disabled = false;
-      }
-    }).catch( msg =>{
-      console.log(msg);
+
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+          action : 'rotate_image',
+          file: this.org_img.src,
+          rotate: this.now_rotate,
+          filename: this.opts.filename,
+        },
+        success: ( data ) => {
+          data = $.parseJSON(data);
+          this.count = 0;
+          this.now_rotate = 0;
+          for( let i of this.buttons ) {
+            i.disabled = false;
+          }
+        },
+        error: ( XMLHttpRequest, textStatus, errorThrown ) => {
+          alert("AJAXが機能していません。");
+        }
     });
   }
 
-  deleteImage() {
-    this.is_container = true;
+  confirmImage() {
+    this.modal.isvisible = true;
+    this.update();
   }
 
   this.mixin('obs').obs.on('refresh_postthum', (postthum) => {
@@ -194,6 +217,25 @@
     }
     this.update();
   })
+
+  const deleteImage = () => {
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+          action : 'image_delete',
+          att_id : this.opts.imgid,
+        },
+        success: ( data ) => {
+          this.is_container = true;
+          this.modal.isvisible = false;
+          this.update();
+        },
+        error: ( XMLHttpRequest, textStatus, errorThrown ) =>{
+          alert("AJAXが機能していません。");
+        }
+    });
+  }
 
   const imageResize = (image_src, mime_type, width, height, rotate) => {
     // New Canvas

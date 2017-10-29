@@ -1,3 +1,4 @@
+require('riotgear');
 require('./rotateImageList.tag');
 require('./rotateImage.tag');
 
